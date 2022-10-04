@@ -1,35 +1,37 @@
-#include<stdlib.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include "ll.h"
 
-typedef struct node {
-    int occurences;
-    char symbol;
-    TreeNode* left;
-    TreeNode* right;
-    TreeNode* parent;
-} TreeNode;
-
-
-TreeNode* createTree() {
-    return NULL;
+TreeNode newTreeNode(char symbol) {
+    TreeNode temp = (TreeNode) calloc (1, sizeof(struct node));
+    temp->symbol = symbol;
+    temp->freq = 1;
+    return temp; 
 }
 
-int isEmptyTree(TreeNode* t) {
+int isEmptyTree(TreeNode t) {
     return (t == NULL);
 }
-void displayTreeHelper(TreeNode* t, int indent) {
+
+void displayTreeHelper(TreeNode t, int indent) {
     if(t != NULL) {
         int i;
         for(i = 0; i < indent; i++) { printf(" "); }
-        printf("%c: %d", p->symbol, p->freq);
+        printf("%c: %d\n", t->symbol, t->freq);
 
-        displayTree(t->left, indent + 4);
-        displayTree(t->right, indent + 4);
+        displayTreeHelper(t->left, indent + 4);
+        displayTreeHelper(t->right, indent + 4);
     }
 }
 
-void displayTree(TreeNode* t) {
+void displayTree(TreeNode t) {
     displayTreeHelper(t, 0);
 }
-void addTree(TreeNode** t, int val);
-void freeTree(TreeNode* t);
+
+void freeTree(TreeNode t) {
+    if(t != NULL) {
+        freeTree(t->left);
+        freeTree(t->right);
+        free(t);
+    }
+}

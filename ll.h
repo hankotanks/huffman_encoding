@@ -1,7 +1,15 @@
-typedef struct node TreeNode;
+struct node {
+    int freq;
+    char symbol;
+    struct node* left;
+    struct node* right;
+    struct node* parent;
+};
 
-TreeNode* createLL();
-int isEmptyLL(TreeNode* ll);
-void displayLL(TreeNode* ll);
-void addLL(TreeNode** ll, int val);
-void freeLL(TreeNode* ll);
+typedef struct node * TreeNode;
+
+int isEmptyTree(TreeNode t);
+void displayTree(TreeNode t);
+void freeTree(TreeNode t);
+
+TreeNode newTreeNode(char symbol);

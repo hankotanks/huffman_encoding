@@ -1,1 +1,1 @@
-TreeNode* generateFreqTable();
+TreeNode generateFreqTable();
