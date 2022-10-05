@@ -8,6 +8,7 @@ int main() {
     TreeNode root = createFreqTable(); 
     TreeNode master = createHuffmanTree(root);
     displayTree(master);
+    freeTree(master);
 }
 
 // Checks if a TreeNode has been created for the given symbol

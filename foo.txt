@@ -1,3 +1,14 @@
-testing testing
-hello this is hank
-cccc
+
+The geek code consists of several categories.  Each category is labeled with
+a letter and some qualifiers.  Go through each category and determine which
+set of qualifiers best describes you in that category.  By stringing all of
+these 'codes' together, you are able to construct your overall geek code. 
+It is this single line of code that will inform other geeks the world over
+of what a great geek you actually are.
+
+Some of the qualifiers will very probably not match with you exactly. 
+Simply choose that qualifier that MOST CLOSELY matches you.  Also, some
+activities described in a specific qualifier you may not engage in, while you
+do engage in others.  Each description of each qualifier describes the wide
+range of activities that apply, so as long as you match with one, you can
+probably use that qualifier.

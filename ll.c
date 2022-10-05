@@ -14,17 +14,17 @@ int isEmptyTree(TreeNode t) {
 }
 
 void displayTreeHelper(TreeNode t, int indent) {
-    if(t != NULL) {
-        int i;
-        for(i = 0; i < indent; i++) { printf(" "); }
+    if(t == NULL) { return; }
 
-        char temp;
-        if(t->symbol != 0) { temp = t->symbol; } else { temp = '*'; }
-        printf("[%c] : %d\n", temp, t->freq);
+    int i;
+    for(i = 0; i < indent; i++) { printf(" "); }
 
-        displayTreeHelper(t->left, indent + 2);
-        displayTreeHelper(t->right, indent + 2);
-    }
+    char temp;
+    if(t->symbol != 0) { temp = t->symbol; } else { temp = '*'; }
+    printf("[%c] : %d\n", temp, t->freq);
+
+    displayTreeHelper(t->left, indent + 2);
+    displayTreeHelper(t->right, indent + 2);
 }
 
 void displayTree(TreeNode t) {
@@ -32,9 +32,9 @@ void displayTree(TreeNode t) {
 }
 
 void freeTree(TreeNode t) {
-    if(t != NULL) {
-        freeTree(t->left);
-        freeTree(t->right);
-        free(t);
-    }
+    if(t == NULL) { return; }
+
+    freeTree(t->left);
+    freeTree(t->right);
+    free(t);
 }

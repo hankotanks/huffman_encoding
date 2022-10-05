@@ -9,7 +9,7 @@ struct node {
 typedef struct node * TreeNode;
 
 int isEmptyTree(TreeNode t);
-void displayTree(TreeNode t);
 void freeTree(TreeNode t);
+void displayTree(TreeNode t);
 
 TreeNode newTreeNode(char symbol);
