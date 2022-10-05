@@ -5,14 +5,7 @@
 #include "huffman.h"
 
 int main() {
-    TreeNode root = generateFreqTable(); 
-    TreeNode temp = root;
-    while(temp->parent != NULL) {
-            printf("%c : %d\n", temp->symbol, temp->freq);
-            temp = temp->parent;
-    }
-    printf("\n");
-
+    TreeNode root = createFreqTable(); 
     TreeNode master = createHuffmanTree(root);
     displayTree(master);
 }
@@ -74,6 +67,7 @@ void sort(TreeNode t) {
                 prev->parent->right = tempRight;
             }
 
+            // Advance to next pair of TreeNodes
             prev = curr;
             curr = prev->parent;
         }
@@ -84,7 +78,7 @@ void sort(TreeNode t) {
 // Instead, yields a chain of TreeNodes with character occurrences
 // This string of nodes is not bidirectional
 // Only the `parent` field is set
-TreeNode generateFreqTable() {
+TreeNode createFreqTable() {
     TreeNode parent = newTreeNode(0);
 
     char tempChar;
