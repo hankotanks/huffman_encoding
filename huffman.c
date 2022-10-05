@@ -107,15 +107,21 @@ TreeNode createHuffmanTree(TreeNode t) {
         TreeNode first = curr;
         TreeNode second = curr->parent;
         
+        // The new internal node
         TreeNode join = newTreeNode(0);
         join->freq = first->freq + second->freq;
         join->parent = second->parent;
         join->left = first;
         join->right = second;
+
+        // Set the parents of the two child nodes
         first->parent = join;
         second->parent = join;   
 
+        // The internal node is now the bottom-most node
         curr = join;
+
+        // Sort the list before the next iteration
         sort(curr);
     }
 
