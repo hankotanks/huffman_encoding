@@ -23,8 +23,8 @@ void displayTreeHelper(TreeNode t, int indent) {
     if(t->symbol != 0) { temp = t->symbol; } else { temp = '*'; }
     printf("[%c] : %d\n", temp, t->freq);
 
-    displayTreeHelper(t->left, indent + 2);
-    displayTreeHelper(t->right, indent + 2);
+    displayTreeHelper(t->left, indent + 3);
+    displayTreeHelper(t->right, indent + 3);
 }
 
 void displayTree(TreeNode t) {
