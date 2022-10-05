@@ -55,14 +55,23 @@ void sort(TreeNode t) {
         TreeNode curr = t->parent;
         while(curr != NULL) {
             if(curr->freq < prev->freq) {
+                // Copy TreeNode content
                 int tempFreq = prev->freq;
                 int tempChar = prev->symbol;
+                TreeNode tempLeft = prev->left;
+                TreeNode tempRight = prev->right;
 
+                // Assign values from preceding TreeNode
                 prev->freq = prev->parent->freq;
                 prev->symbol = prev->parent->symbol;
+                prev->left = prev->parent->left;
+                prev->right = prev->parent->right;
 
+                // Move values from current to preceding
                 prev->parent->freq = tempFreq;
                 prev->parent->symbol = tempChar;
+                prev->parent->left = tempLeft;
+                prev->parent->right = tempRight;
             }
 
             prev = curr;
@@ -78,33 +87,41 @@ void sort(TreeNode t) {
 TreeNode generateFreqTable() {
     TreeNode parent = newTreeNode(0);
 
-    char temp;
-    while(scanf("%c", &temp) != EOF) {
-        if(!found(parent, temp) && temp != 10) {
-            TreeNode curr = newTreeNode(temp);
+    char tempChar;
+    while(scanf("%c", &tempChar) != EOF) {
+        if(!found(parent, tempChar) && tempChar != 10) {
+            TreeNode curr = newTreeNode(tempChar);
             curr->parent = parent;
             parent = curr;
         }
     }    
 
+    // Ensure that list is in descending frequency
     sort(parent);
 
-    return parent;
+    // Free the frequency table's sentinel
+    TreeNode temp = parent->parent;
+    free(parent);
+
+    return temp;
 }
 
 TreeNode createHuffmanTree(TreeNode t) {
-    if(t->parent == NULL) { return t; }
-
     TreeNode curr = t;
-    while(curr->parent->parent != NULL) {
-       TreeNode sum = newTreeNode(0);
-       sum->freq = curr->freq + curr->parent->freq; 
-       sum->parent = curr->parent->parent;
-       sum->left = curr;
-       sum->right = curr->parent;
-       curr->parent->parent = sum;
-       curr->parent = sum;
-       curr = sum;
+    while(curr->parent != NULL) {
+        TreeNode first = curr;
+        TreeNode second = curr->parent;
+        
+        TreeNode join = newTreeNode(0);
+        join->freq = first->freq + second->freq;
+        join->parent = second->parent;
+        join->left = first;
+        join->right = second;
+        first->parent = join;
+        second->parent = join;   
+
+        curr = join;
+        sort(curr);
     }
 
     return curr;

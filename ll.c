@@ -17,7 +17,10 @@ void displayTreeHelper(TreeNode t, int indent) {
     if(t != NULL) {
         int i;
         for(i = 0; i < indent; i++) { printf(" "); }
-        printf("%c: %d\n", t->symbol, t->freq);
+
+        char temp;
+        if(t->symbol != 0) { temp = t->symbol; } else { temp = '*'; }
+        printf("[%c] : %d\n", temp, t->freq);
 
         displayTreeHelper(t->left, indent + 2);
         displayTreeHelper(t->right, indent + 2);
