@@ -6,6 +6,10 @@
 
 int main() {
     TreeNode root = createFreqTable(); 
+
+    int leafCount = leavesCount(root);
+    TreeNode* leafNodes = leaves(root, leafCount);
+
     TreeNode master = createHuffmanTree(root);
     displayTree(master);
     freeTree(master);
@@ -99,6 +103,31 @@ TreeNode createFreqTable() {
     free(parent);
 
     return temp;
+}
+
+int leavesCount(TreeNode t) {
+    TreeNode curr = t;
+
+    int count = 0;
+    while(curr->parent != NULL) { 
+        count++;
+        curr = curr->parent;
+    }
+
+    return count;
+}
+
+TreeNode* leaves(TreeNode t, int leavesCount) {
+    TreeNode* leaves = (TreeNode*) malloc (sizeof(TreeNode) * leavesCount);
+    TreeNode temp = t;
+    
+    int i;
+    for(i = 0; i < leavesCount; i++) {
+        leaves[i] = temp;
+        temp = temp->parent;
+    }
+
+    return leaves;
 }
 
 TreeNode createHuffmanTree(TreeNode t) {
