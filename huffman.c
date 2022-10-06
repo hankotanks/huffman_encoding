@@ -10,6 +10,10 @@ int main() {
     int leafCount = leavesCount(root);
     TreeNode* leafNodes = leaves(root, leafCount);
 
+    int i;
+    for(i = 0; i < leafCount; i++) { printf("%c", leafNodes[i]->symbol); }
+    printf("\n");
+
     TreeNode master = createHuffmanTree(root);
     displayTree(master);
     freeTree(master);
