@@ -10,9 +10,11 @@ int main() {
     int leafCount = leavesCount(root);
     TreeNode* leafNodes = leaves(root, leafCount);
 
-    TreeNode master = createHuffmanTree(root);
-    displayTree(master);
-    freeTree(master);
+    encode("decind.txt", &leafNodes);
+
+    // TreeNode master = createHuffmanTree(root);
+    // displayTree(master);
+    // freeTree(master);
 }
 
 // Checks if a TreeNode has been created for the given symbol
@@ -155,4 +157,30 @@ TreeNode createHuffmanTree(TreeNode t) {
     }
 
     return curr;
+}
+
+void encode(char* file, TreeNode** leaves) {
+    FILE* fi;
+    fi = fopen(file, "r");
+    if(fi == NULL) {
+        printf("Error: Couldn't open file.\n");
+        return;
+    }
+
+    // Construct the output file's name
+    int len = strlen(file);
+    char output[len + 4];
+    strcpy(output, file);
+    output[len + 0] = '.';
+    output[len + 1] = 'h';
+    output[len + 2] = 'u';
+    output[len + 3] = 'f';
+
+    FILE* fo;
+    fo = fopen(output, "a");
+
+
+
+    fclose(fi);
+    fclose(fo);
 }
