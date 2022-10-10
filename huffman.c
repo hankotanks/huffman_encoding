@@ -12,9 +12,9 @@ int main() {
 
     encode("decind.txt", &leafNodes);
 
-    // TreeNode master = createHuffmanTree(root);
-    // displayTree(master);
-    // freeTree(master);
+    TreeNode master = createHuffmanTree(root);
+    displayTree(master);
+    freeTree(master);
 }
 
 // Checks if a TreeNode has been created for the given symbol
@@ -90,7 +90,7 @@ TreeNode createFreqTable() {
 
     char tempChar;
     while(scanf("%c", &tempChar) != EOF) {
-        if(!found(parent, tempChar) && tempChar != 10) {
+        if(!found(parent, tempChar)) {
             TreeNode curr = newTreeNode(tempChar);
             curr->parent = parent;
             parent = curr;
@@ -100,11 +100,20 @@ TreeNode createFreqTable() {
     // Ensure that list is in descending frequency
     sort(parent);
 
-    // Free the frequency table's sentinel
-    TreeNode temp = parent->parent;
-    free(parent);
+    // Remove the sentinel node from the freqTable
+    TreeNode temp = parent;
+    while(temp->parent != NULL) {
+        if(temp->parent->symbol == 0) {
+            TreeNode removed = temp->parent;
+            temp->parent = removed->parent;
+            free(removed);
+        }
 
-    return temp;
+        temp = temp->parent;
+    }
+
+    // Free the frequency table's sentinel
+    return parent;
 }
 
 int leavesCount(TreeNode t) {
