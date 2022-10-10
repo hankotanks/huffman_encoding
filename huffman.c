@@ -4,16 +4,44 @@
 #include "ll.h"
 #include "huffman.h"
 
-int main() {
-    TreeNode root = createFreqTable(); 
+int main(int argc, char* argv[]) {
+    if(argc != 3) { 
+        printf("Error: Incorrect argument format\n"); 
+        exit(1);
+    }
+    
+    int mode;
+    if(strcmp(argv[1], "-e") == 0) {
+        mode = 1;
+    } else if(strcmp(argv[1], "-d") == 0) { 
+        mode = 0;
+    } else {
+        printf("Error: Invalid command flag\n");
+        exit(1);
+    }     
 
+    // This is a one-way linked list of character frequencies
+    TreeNode root = createFreqTable(argv[2]); 
+
+    // Build an array of leaf nodes
     int leafCount = leavesCount(root);
     TreeNode* leafNodes = leaves(root, leafCount);
-
-    encode("decind.txt", &leafNodes);
-
+    
+    // Construct the huffman tree
     TreeNode master = createHuffmanTree(root);
-    displayTree(master);
+
+    for(int i = 0; i < leafCount; i++) {
+        printf("%c", leafNodes[i]->symbol);
+    }
+    printf("\n");
+
+    if(mode) {
+        encode(argv[2], &leafNodes, leafCount);
+    } else {
+        decode(argv[2], master);
+    }
+
+    // Free all TreeNodes when encoding is complete
     freeTree(master);
 }
 
@@ -85,11 +113,13 @@ void sort(TreeNode t) {
 // Instead, yields a chain of TreeNodes with character occurrences
 // This string of nodes is not bidirectional
 // Only the `parent` field is set
-TreeNode createFreqTable() {
+TreeNode createFreqTable(char* file) {
+    FILE* fi;
+    fi = fopen(file, "r");
     TreeNode parent = newTreeNode(0);
 
     char tempChar;
-    while(scanf("%c", &tempChar) != EOF) {
+    while(fscanf(fi, "%c", &tempChar) != EOF) {
         if(!found(parent, tempChar)) {
             TreeNode curr = newTreeNode(tempChar);
             curr->parent = parent;
@@ -120,7 +150,7 @@ int leavesCount(TreeNode t) {
     TreeNode curr = t;
 
     int count = 0;
-    while(curr->parent != NULL) { 
+    while(curr != NULL) { 
         count++;
         curr = curr->parent;
     }
@@ -168,12 +198,12 @@ TreeNode createHuffmanTree(TreeNode t) {
     return curr;
 }
 
-void encode(char* file, TreeNode** leaves) {
+void encode(char* file, TreeNode** leaves, int leavesCount) {
     FILE* fi;
     fi = fopen(file, "r");
     if(fi == NULL) {
-        printf("Error: Couldn't open file.\n");
-        return;
+        printf("Error: Couldn't open file\n");
+        exit(1);
     }
 
     // Construct the output file's name
@@ -188,8 +218,23 @@ void encode(char* file, TreeNode** leaves) {
     FILE* fo;
     fo = fopen(output, "a");
 
-
-
+    // TODO
+    unsigned short int buffer = 0;
+    char temp;
+    while(fscanf(fi, "%c", &temp) != EOF) {
+        TreeNode curr;
+        int i;
+        for(i = 0; i < leavesCount; i++) {
+            curr = (*leaves)[i];
+            if(curr->symbol == temp) {
+            }
+        }
+    } 
+    
     fclose(fi);
     fclose(fo);
+}
+
+void decode(char* file, TreeNode root) {
+    // TODO
 }
