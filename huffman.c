@@ -20,25 +20,47 @@ int main(int argc, char* argv[]) {
         exit(1);
     }     
 
-    // This is a one-way linked list of character frequencies
-    TreeNode root = createFreqTable(argv[2]); 
-
-    // Build an array of leaf nodes
-    int leafCount = leavesCount(root);
     
-    // Construct the huffman tree
-    TreeNode master = createHuffmanTree(root);
-    TreeNode* leafNodes = leaves(master, leafCount);
-
     if(mode) {
-        // displayTree(master);
+        // This is a one-way linked list of character frequencies
+        TreeNode root = createFreqTable(argv[2]); 
+
+        // Build an array of leaf nodes
+        int leafCount = leavesCount(root);
+        
+        // Construct the huffman tree
+        TreeNode master = createHuffmanTree(root);
+        TreeNode* leafNodes = leaves(master, leafCount);
+
         encode(argv[2], &leafNodes, leafCount);
     } else {
-        decode(argv[2], master);
-    }
+        int len = strlen(argv[2]);
+        if(len <= 4) {
+            printf("Error: File must have both name and extension\n");
+            exit(1);
+        }
 
-    // Free all TreeNodes when encoding is complete
-    freeTree(master);
+        const char* ext = &(argv[2])[len - 4];
+        const char* huf = ".huf";
+        if(strcmp(ext, huf) != 0) {
+            printf("Error: Invalid file extension (should be *.huf)");
+            exit(1);
+        }
+
+        char temp[len - 4];
+        int i;
+        for(i = 0; i < len - 4; i++) { temp[i] = argv[2][i]; }
+        temp[len - 4] = '\0';
+
+        TreeNode root = createFreqTable(temp);
+        TreeNode master = createHuffmanTree(root);
+
+        
+        decode(argv[2], master);
+        // Free all TreeNodes when encoding is complete
+        freeTree(master);
+   }
+
 }
 
 // Checks if a TreeNode has been created for the given symbol
@@ -261,4 +283,44 @@ void encode(char* file, TreeNode** leaves, int leavesCount) {
 
 void decode(char* file, TreeNode root) {
     // TODO
+    FILE* fi;
+    fi = fopen(file, "r");
+
+    int len = strlen(file);
+    char temp[len];
+    strcpy(temp, file);
+    temp[len - 3] = 'd';
+    temp[len - 2] = 'e';
+    temp[len - 1] = 'c';
+
+    FILE* fo;
+    fo = fopen(temp, "w");
+    
+    TreeNode curr = root;
+    char buffer;
+    int bufferLen = 0;
+    while(fscanf(fi, "%c", &buffer) != EOF) {
+        bufferLen = 7;
+        while(bufferLen >= 0) {
+            if(curr->symbol != 0) {
+                printf("-- %c\n", curr->symbol);
+                fputc(curr->symbol, fo);
+                curr = root;
+                continue;
+            } 
+
+            if((buffer >> bufferLen) & 1) {
+                printf("right ");
+                curr = curr->right;
+            } else {
+                printf("left ");
+                curr = curr->left;
+            }
+
+            bufferLen -= 1;
+        }
+    }
+
+    fclose(fi);
+    fclose(fo);
 }
