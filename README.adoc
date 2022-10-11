@@ -10,7 +10,7 @@ It is only intended as a proof of concept.
 huffman [mode] [target]
 ----
 
-.Modes
+[horizontal]
 `-e` :: Encodes the `target`. 
 The compressed file is saved with the `.huf` extension. 
 Character frequencies are not appended to the compressed file.
