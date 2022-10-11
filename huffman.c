@@ -5,41 +5,49 @@
 #include "huffman.h"
 
 int main(int argc, char* argv[]) {
+    // Make sure the right number of arguments are present
     if(argc != 3) { 
         printf("Error: Incorrect argument format\n"); 
         exit(1);
     }
     
+    // Check if the user wants to encode or decode
     int mode;
     if(strcmp(argv[1], "-e") == 0) {
         mode = 1;
     } else if(strcmp(argv[1], "-d") == 0) { 
         mode = 0;
-    } else {
+    } else { // Exit if the command flag isn't `-e` or `-d`
         printf("Error: Invalid command flag\n");
         exit(1);
     }     
 
+    // `head` points to the 1st node of the freq linked list
+    // `root` points to the root of the huffman tree
+    TreeNode head;
+    TreeNode root;
     
     if(mode) {
         // This is a one-way linked list of character frequencies
-        TreeNode root = createFreqTable(argv[2]); 
+        head = createFreqTable(argv[2]); 
 
         // Build an array of leaf nodes
-        int leafCount = leavesCount(root);
+        int leafCount = leavesCount(head);
         
         // Construct the huffman tree
-        TreeNode master = createHuffmanTree(root);
-        TreeNode* leafNodes = leaves(master, leafCount);
+        root = createHuffmanTree(head);
+        TreeNode* leafNodes = leaves(root, leafCount);
 
         encode(argv[2], &leafNodes, leafCount);
     } else {
+        // Before decoding, check that the name is long enough to be valid
         int len = strlen(argv[2]);
-        if(len <= 4) {
+        if(len < 5) {
             printf("Error: File must have both name and extension\n");
             exit(1);
         }
 
+        // Confirm that the file has the proper extension
         const char* ext = &(argv[2])[len - 4];
         const char* huf = ".huf";
         if(strcmp(ext, huf) != 0) {
@@ -47,26 +55,30 @@ int main(int argc, char* argv[]) {
             exit(1);
         }
 
+        // Get the original file name (without the .huf extension)
         char temp[len - 4];
         int i;
         for(i = 0; i < len - 4; i++) { temp[i] = argv[2][i]; }
         temp[len - 4] = '\0';
 
-        TreeNode root = createFreqTable(temp);
-        TreeNode master = createHuffmanTree(root);
+        // Recreate the frequency table -- then build the tree
+        head = createFreqTable(temp);
+        root = createHuffmanTree(head);
 
         
-        decode(argv[2], master);
-        // Free all TreeNodes when encoding is complete
-        freeTree(master);
+        // Decode the target file
+        decode(argv[2], root);
    }
+   
+   // Free all TreeNodes when encoding is complete
+   freeTree(root);
 
 }
 
 // Checks if a TreeNode has been created for the given symbol
 // If it has, increment the TreeNodes `freq` field
-int found(TreeNode t, char symbol) {
-    TreeNode curr = t;
+int found(TreeNode head, char symbol) {
+    TreeNode curr = head;
     while(curr != NULL) {
         if(curr->symbol == symbol) {
             curr->freq += 1;
@@ -81,8 +93,8 @@ int found(TreeNode t, char symbol) {
 
 // Helper function for sort that
 // Returns true if the linked list is in descending order
-int ordered(TreeNode t) {
-    TreeNode curr = t;
+int ordered(TreeNode head) {
+    TreeNode curr = head;
     while(curr->parent != NULL) {
         if(curr->freq > curr->parent->freq) {
             return 0;
@@ -94,11 +106,11 @@ int ordered(TreeNode t) {
     return 1;
 }
 
-void sort(TreeNode t) {
-    if(t->parent == NULL) { return; }
-    while(!ordered(t)) {
-        TreeNode prev = t;
-        TreeNode curr = t->parent;
+void sort(TreeNode head) {
+    if(head->parent == NULL) { return; }
+    while(!ordered(head)) {
+        TreeNode prev = head;
+        TreeNode curr = head->parent;
         while(curr != NULL) {
             if(curr->freq < prev->freq) {
                 // Copy TreeNode content
@@ -152,8 +164,8 @@ TreeNode createFreqTable(char* file) {
     return parent;
 }
 
-int leavesCount(TreeNode t) {
-    TreeNode curr = t;
+int leavesCount(TreeNode head) {
+    TreeNode curr = head;
 
     int count = 0;
     while(curr != NULL) { 
@@ -164,43 +176,47 @@ int leavesCount(TreeNode t) {
     return count;
 }
 
-void leavesTraversal(TreeNode t, TreeNode** leaves, int* index) {
-    if(t == NULL) { return; }
+// Helper method for `leaves`
+void leavesTraversal(TreeNode root, TreeNode** leaves, int* index) {
+    if(root == NULL) { return; }
     
-    if(t->left == NULL && t->right == NULL) {
-        (*leaves)[*index] = t;
+    if(root->left == NULL && root->right == NULL) {
+        (*leaves)[*index] = root;
         (*index)++;
     } else {
-        leavesTraversal(t->left, leaves, index);
-        leavesTraversal(t->right, leaves, index);
+        leavesTraversal(root->left, leaves, index);
+        leavesTraversal(root->right, leaves, index);
     }
 }
 
-
-
-TreeNode* leaves(TreeNode t, int leavesCount) {
+// Calls the recursive `leavesTraversal` method
+// Which compiles a list of all leaf nodes on the huffman tree
+TreeNode* leaves(TreeNode root, int leavesCount) {
     TreeNode* leaves = (TreeNode*) malloc (sizeof(TreeNode) * leavesCount);
 
     int index = 0;
-    leavesTraversal(t, &leaves, &index);
+    leavesTraversal(root, &leaves, &index);
 
     return leaves;
 }
 
-void links(TreeNode t) {
-    if(t->left != NULL) {
-        t->left->parent = t;
-        links(t->left);
+// The `parent` field on child nodes aren't maintained
+// during the creation of the huffman tree
+// This method repairs them
+void links(TreeNode root) {
+    if(root->left != NULL) {
+        root->left->parent = root;
+        links(root->left);
     }
 
-    if(t->right != NULL) {
-        t->right->parent = t;
-        links(t->right);
+    if(root->right != NULL) {
+        root->right->parent = root;
+        links(root->right);
     }
 }
 
-TreeNode createHuffmanTree(TreeNode t) {
-    TreeNode curr = t;
+TreeNode createHuffmanTree(TreeNode head) {
+    TreeNode curr = head;
     while(curr->parent != NULL) {
         TreeNode first = curr;
         TreeNode second = curr->parent;
@@ -217,16 +233,18 @@ TreeNode createHuffmanTree(TreeNode t) {
 
         // Sort the list before the next iteration
         sort(curr);
-        links(curr);
+        links(curr); // Repair child->parent links
     }
 
+    // Returns the root of the newly-created Huffman tree
     return curr;
 }
 
 void encode(char* file, TreeNode** leaves, int leavesCount) {
+    // Open the input file
     FILE* fi;
     fi = fopen(file, "r");
-    if(fi == NULL) {
+    if(fi == NULL) { // If file doesn't exist
         printf("Error: Couldn't open file\n");
         exit(1);
     }
@@ -240,70 +258,72 @@ void encode(char* file, TreeNode** leaves, int leavesCount) {
     output[len + 2] = 'u';
     output[len + 3] = 'f';
 
+    // Open output file
     FILE* fo;
     fo = fopen(output, "w");
 
+    len = 8;
     char buffer = 0;
-    int bufferLen = 8;
     char temp;
     while(fscanf(fi, "%c", &temp) != EOF) {
-        TreeNode curr;
         int i;
         for(i = 0; i < leavesCount; i++) {
-            curr = (*leaves)[i];
+            TreeNode curr = (*leaves)[i];
             if(curr->symbol == temp) {
-                unsigned long charBuffer = 0;
-                int charBufferLen = 0;
+                unsigned long walk = 0;
 
+                // Walk the length of the tree until reaching the root
+                int walkLen = 0;
                 while(curr->parent != NULL) {
-                    if(curr->parent->right->symbol == curr->symbol && curr->parent->right->freq == curr->freq) { 
-                        charBuffer++;
-                    }
+                    TreeNode temp = curr->parent->right;
+                    int symbolCheck = temp->symbol == curr->symbol;
+                    int freqCheck = temp->freq == curr->freq;
+                    if(symbolCheck && freqCheck) { walk++; }
 
-                    charBufferLen++;
+                    // Advance the walk and shift the buffer by 1
+                    walkLen++;
                     curr = curr->parent;
-                    if(curr->parent != NULL) {
-                        charBuffer <<= 1;
-                    }
+                    if(curr->parent != NULL) { walk <<= 1; }
                 }
 
-                printf("%d: ", charBuffer);
-                printf("%d, ", charBufferLen);
+                // Write data from the walk buffer to the write buffer
+                while(walkLen > 0) {
+                    // Read value from buffer then shift
+                    int val = (walk & 1);
+                    walk >>= 1;
+                    walkLen--;
 
-                while(charBufferLen > 0) {
-                    int val = (charBuffer & 1);
-                    charBuffer >>= 1;
-                    charBufferLen--;
+                    // Add to write buffer
+                    len--;
+                    buffer |= (val << len);
 
-                    buffer |= (val << bufferLen - 1);
-                    bufferLen--;
-
-                    if(bufferLen == 0) {
+                    // If buffer is full, write to file then clear it
+                    if(len == 0) {
                         fputc(buffer, fo);
+                        len = 8;
                         buffer = 0;
-                        bufferLen = 8;
                     }
                 }
-
-                charBuffer = 0;
             }
         }
     } 
     
+    // Write any remaining bits to the end of the file
+    // This results in a few extra bits at the end,
+    // but seems unavoidable
+    if(len != 8) { fputc(buffer, fo); }
 
-    if(bufferLen != 8) {
-        fputc(buffer, fo);
-    }
-
+    // Close file readers
     fclose(fi);
     fclose(fo);
 }
 
 void decode(char* file, TreeNode root) {
-    // TODO
+    // Input file
     FILE* fi;
     fi = fopen(file, "r");
 
+    // Build the output filename
     int len = strlen(file);
     char temp[len];
     strcpy(temp, file);
@@ -311,34 +331,33 @@ void decode(char* file, TreeNode root) {
     temp[len - 2] = 'e';
     temp[len - 1] = 'c';
 
+    // Open the output file
     FILE* fo;
     fo = fopen(temp, "w");
     
-    TreeNode curr = root;
     char buffer;
-    int bufferLen;
+    TreeNode curr = root;
     while(fscanf(fi, "%c", &buffer) != EOF) {
-
-        for (int i = 7; i >= 0; --i) { putchar( (buffer & (1 << i)) ? '1' : '0' ); } putchar('\n');
-
-        bufferLen = 7;
-        while(bufferLen >= 0) {
+        len = 7;
+        while(len >= 0) {
+            // Write symbol and advance to next bit
             if(curr->left == NULL && curr->right == NULL) {
                 fputc(curr->symbol, fo);
                 curr = root;
                 continue;
             } 
+            
+            // Advance down the tree in the appropriate direction
+            int val = (buffer >> len) & 1;
+            curr = val ? curr->right : curr->left;
 
-            if((buffer >> bufferLen) & 1) {
-                curr = curr->right;
-            } else {
-                curr = curr->left;
-            }
-
-            bufferLen -= 1;
+            // Represents the number of bits remaining
+            // in the current buffer
+            len--;
         }
     }
 
+    // Close files
     fclose(fi);
     fclose(fo);
 }
