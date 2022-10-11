@@ -72,7 +72,6 @@ int main(int argc, char* argv[]) {
    
    // Free all TreeNodes when encoding is complete
    freeTree(root);
-
 }
 
 // Checks if a TreeNode has been created for the given symbol
