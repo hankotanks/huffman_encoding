@@ -25,17 +25,13 @@ int main(int argc, char* argv[]) {
 
     // Build an array of leaf nodes
     int leafCount = leavesCount(root);
-    TreeNode* leafNodes = leaves(root, leafCount);
     
     // Construct the huffman tree
     TreeNode master = createHuffmanTree(root);
-
-    for(int i = 0; i < leafCount; i++) {
-        printf("%c", leafNodes[i]->symbol);
-    }
-    printf("\n");
+    TreeNode* leafNodes = leaves(master, leafCount);
 
     if(mode) {
+        // displayTree(master);
         encode(argv[2], &leafNodes, leafCount);
     } else {
         decode(argv[2], master);
@@ -88,18 +84,18 @@ void sort(TreeNode t) {
                 int tempChar = prev->symbol;
                 TreeNode tempLeft = prev->left;
                 TreeNode tempRight = prev->right;
-
+                
                 // Assign values from preceding TreeNode
-                prev->freq = prev->parent->freq;
-                prev->symbol = prev->parent->symbol;
-                prev->left = prev->parent->left;
-                prev->right = prev->parent->right;
+                prev->freq = curr->freq;
+                prev->symbol = curr->symbol;
+                prev->left = curr->left;
+                prev->right = curr->right;
 
                 // Move values from current to preceding
-                prev->parent->freq = tempFreq;
-                prev->parent->symbol = tempChar;
-                prev->parent->left = tempLeft;
-                prev->parent->right = tempRight;
+                curr->freq = tempFreq;
+                curr->symbol = tempChar;
+                curr->left = tempLeft;
+                curr->right = tempRight;
             }
 
             // Advance to next pair of TreeNodes
@@ -158,17 +154,39 @@ int leavesCount(TreeNode t) {
     return count;
 }
 
+void leavesTraversal(TreeNode t, TreeNode** leaves, int* index) {
+    if(t == NULL) { return; }
+    
+    if(t->left == NULL && t->right == NULL) {
+        (*leaves)[*index] = t;
+        (*index)++;
+    } else {
+        leavesTraversal(t->left, leaves, index);
+        leavesTraversal(t->right, leaves, index);
+    }
+}
+
+
+
 TreeNode* leaves(TreeNode t, int leavesCount) {
     TreeNode* leaves = (TreeNode*) malloc (sizeof(TreeNode) * leavesCount);
-    TreeNode temp = t;
-    
-    int i;
-    for(i = 0; i < leavesCount; i++) {
-        leaves[i] = temp;
-        temp = temp->parent;
-    }
+
+    int index = 0;
+    leavesTraversal(t, &leaves, &index);
 
     return leaves;
+}
+
+void links(TreeNode t) {
+    if(t->left != NULL) {
+        t->left->parent = t;
+        links(t->left);
+    }
+
+    if(t->right != NULL) {
+        t->right->parent = t;
+        links(t->right);
+    }
 }
 
 TreeNode createHuffmanTree(TreeNode t) {
@@ -184,15 +202,12 @@ TreeNode createHuffmanTree(TreeNode t) {
         join->left = first;
         join->right = second;
 
-        // Set the parents of the two child nodes
-        first->parent = join;
-        second->parent = join;   
-
         // The internal node is now the bottom-most node
         curr = join;
 
         // Sort the list before the next iteration
         sort(curr);
+        links(curr);
     }
 
     return curr;
@@ -216,10 +231,10 @@ void encode(char* file, TreeNode** leaves, int leavesCount) {
     output[len + 3] = 'f';
 
     FILE* fo;
-    fo = fopen(output, "a");
+    fo = fopen(output, "w");
 
-    // TODO
-    unsigned short int buffer = 0;
+    char buffer = 0;
+    int bufferLen = 0;
     char temp;
     while(fscanf(fi, "%c", &temp) != EOF) {
         TreeNode curr;
@@ -227,10 +242,40 @@ void encode(char* file, TreeNode** leaves, int leavesCount) {
         for(i = 0; i < leavesCount; i++) {
             curr = (*leaves)[i];
             if(curr->symbol == temp) {
+                while(curr->parent != NULL) {
+                    buffer = buffer << 1;
+                    bufferLen++;
+                    if(curr->parent->right->symbol == curr->symbol && curr->parent->right->freq == curr->freq) { 
+                        buffer++;
+                    }
+
+                    if(bufferLen == 8) {
+                        /* TODO */
+                        for(int i = 7; i >= 0; --i) {
+                            printf("%d", (buffer >> i) & 1);
+                        } /* */
+
+                        fputc(buffer, fo);
+                        buffer = 0;
+                        bufferLen = 0;
+                    }
+
+                    curr = curr->parent;
+                }
             }
         }
     } 
     
+
+    if(bufferLen != 0) {
+        buffer <<= 8 - bufferLen;
+        fputc(buffer, fo);
+        /* TODO */
+        for(int i = 7; i >= 0; --i) {
+            printf("%d", (buffer >> i) & 1);
+        }; /* */
+    }
+
     fclose(fi);
     fclose(fo);
 }

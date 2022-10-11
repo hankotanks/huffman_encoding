@@ -6,6 +6,9 @@ TreeNode newTreeNode(char symbol) {
     TreeNode temp = (TreeNode) calloc (1, sizeof(struct node));
     temp->symbol = symbol;
     temp->freq = 1;
+    temp->left = NULL;
+    temp->right = NULL;
+    temp->parent = NULL;
     return temp; 
 }
 
