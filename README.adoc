@@ -1,0 +1,37 @@
+= Huffman Compression
+
+Includes both an implementation of the Huffman compression method and a corresponding CLI.
+A few limitations hold this project back from being a practical compression tool.
+It is only intended as a proof of concept.
+
+== Usage
+
+----
+huffman [mode] [target]
+----
+
+.Modes
+`-e` :: Encodes the `target`. 
+The compressed file is saved with the `.huf` extension. 
+Character frequencies are not appended to the compressed file.
+`-d` :: Decodes the `target`. 
+This operation expects a `.huf` file and will fail if the `target` is of a different type. 
+Since character frequencies are not contained in the `target`, _the original uncompressed file must be present in the PWD._
+The name of this file must remain consistent between encoding and decoding operations. 
+The decompressed text is written to a `.dec` file.
+
+
+== Implementation
+
+Both encoding and decoding begin with the construction of a Huffman tree, specific to the given file. 
+First, character frequencies are compiled as an SLL of `TreeNode` objects. 
+This list is then sorted and assembled into a tree by repeatedly placing the first two nodes under a new parent node until only one root node remains.
+
+To begin encoding, an array of pointers to the tree's leaf nodes are constructed. 
+The target file is then read character by character. 
+Each character is matched against the array of leaves until the corresponding node is found. 
+The algorithm then walks up the tree until it reaches the root. 
+Left children append a `0` to the bitstream, right children append a `1`. 
+Each character's code is reversed prior to writing, which avoids ambiguity in the decoding process.
+
+Compressed files are read 1 byte at a time. For each byte, the decoder starts at the root of the tree and traverses until it reaches a leaf. Left and right children are chosen based on the individual bits of the data.
