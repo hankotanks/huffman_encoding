@@ -244,7 +244,7 @@ void encode(char* file, TreeNode** leaves, int leavesCount) {
     fo = fopen(output, "w");
 
     char buffer = 0;
-    int bufferLen = 0;
+    int bufferLen = 8;
     char temp;
     while(fscanf(fi, "%c", &temp) != EOF) {
         TreeNode curr;
@@ -252,28 +252,46 @@ void encode(char* file, TreeNode** leaves, int leavesCount) {
         for(i = 0; i < leavesCount; i++) {
             curr = (*leaves)[i];
             if(curr->symbol == temp) {
+                char charBuffer = 0;
+                int charBufferLen = 0;
+
                 while(curr->parent != NULL) {
-                    buffer = buffer << 1;
-                    bufferLen++;
                     if(curr->parent->right->symbol == curr->symbol && curr->parent->right->freq == curr->freq) { 
-                        buffer++;
+                        charBuffer++;
                     }
 
-                    if(bufferLen == 8) {
+                    charBufferLen++;
+                    curr = curr->parent;
+                    if(curr->parent != NULL) {
+                        charBuffer <<= 1;
+                    }
+                }
+
+                printf("%d: ", charBuffer);
+                printf("%d, ", charBufferLen);
+
+                while(charBufferLen > 0) {
+                    int val = (charBuffer & 1);
+                    charBuffer >>= 1;
+                    charBufferLen--;
+
+                    buffer |= (val << bufferLen - 1);
+                    bufferLen--;
+
+                    if(bufferLen == 0) {
                         fputc(buffer, fo);
                         buffer = 0;
-                        bufferLen = 0;
+                        bufferLen = 8;
                     }
-
-                    curr = curr->parent;
                 }
+
+                charBuffer = 0;
             }
         }
     } 
     
 
-    if(bufferLen != 0) {
-        buffer <<= 8 - bufferLen;
+    if(bufferLen != 7) {
         fputc(buffer, fo);
     }
 
@@ -298,22 +316,22 @@ void decode(char* file, TreeNode root) {
     
     TreeNode curr = root;
     char buffer;
-    int bufferLen = 0;
+    int bufferLen;
     while(fscanf(fi, "%c", &buffer) != EOF) {
+
+        for (int i = 7; i >= 0; --i) { putchar( (buffer & (1 << i)) ? '1' : '0' ); } putchar('\n');
+
         bufferLen = 7;
         while(bufferLen >= 0) {
-            if(curr->symbol != 0) {
-                printf("-- %c\n", curr->symbol);
+            if(curr->left == NULL && curr->right == NULL) {
                 fputc(curr->symbol, fo);
                 curr = root;
                 continue;
             } 
 
             if((buffer >> bufferLen) & 1) {
-                printf("right ");
                 curr = curr->right;
             } else {
-                printf("left ");
                 curr = curr->left;
             }
 
