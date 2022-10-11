@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "ll.h"
+#include "tree.h"
 
 // Helper method to initialize a newTreeNode
 TreeNode newTreeNode(char symbol) {
