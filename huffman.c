@@ -252,7 +252,7 @@ void encode(char* file, TreeNode** leaves, int leavesCount) {
         for(i = 0; i < leavesCount; i++) {
             curr = (*leaves)[i];
             if(curr->symbol == temp) {
-                char charBuffer = 0;
+                unsigned long charBuffer = 0;
                 int charBufferLen = 0;
 
                 while(curr->parent != NULL) {
@@ -291,7 +291,7 @@ void encode(char* file, TreeNode** leaves, int leavesCount) {
     } 
     
 
-    if(bufferLen != 7) {
+    if(bufferLen != 8) {
         fputc(buffer, fo);
     }
 
