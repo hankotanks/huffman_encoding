@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "ll.h"
 
+// Helper method to initialize a newTreeNode
 TreeNode newTreeNode(char symbol) {
     TreeNode temp = (TreeNode) calloc (1, sizeof(struct node));
     temp->symbol = symbol;
@@ -12,32 +13,34 @@ TreeNode newTreeNode(char symbol) {
     return temp; 
 }
 
-int isEmptyTree(TreeNode t) {
-    return (t == NULL);
-}
-
-void displayTreeHelper(TreeNode t, int indent) {
-    if(t == NULL) { return; }
+// Recurses through the tree, displaying children through indentation
+void displayTreeHelper(TreeNode root, int indent) {
+    if(root == NULL) { return; }
 
     int i;
     for(i = 0; i < indent; i++) { printf(" "); }
 
+    // Print the node's symbol,
+    // unless it's a parent node, then print *
     char temp;
-    if(t->symbol != 0) { temp = t->symbol; } else { temp = '*'; }
-    printf("[%c] : %d\n", temp, t->freq);
+    if(root->symbol != 0) { temp = root->symbol; } else { temp = '*'; }
+    printf("[%c] : %d\n", temp, root->freq);
 
-    displayTreeHelper(t->left, indent + 3);
-    displayTreeHelper(t->right, indent + 3);
+    // Recurse on node's children
+    displayTreeHelper(root->left, indent + 3);
+    displayTreeHelper(root->right, indent + 3);
 }
 
-void displayTree(TreeNode t) {
-    displayTreeHelper(t, 0);
+// Calls the recursive display function above
+void displayTree(TreeNode root) {
+    displayTreeHelper(root, 0);
 }
 
-void freeTree(TreeNode t) {
-    if(t == NULL) { return; }
+// Recursively frees a tree, takes its root as an argument
+void freeTree(TreeNode root) {
+    if(root == NULL) { return; }
 
-    freeTree(t->left);
-    freeTree(t->right);
-    free(t);
+    freeTree(root->left);
+    freeTree(root->right);
+    free(root);
 }
