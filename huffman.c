@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
 // If it has, increment the TreeNodes `freq` field
 int found(TreeNode t, char symbol) {
     TreeNode curr = t;
-    while(curr->symbol != 0) {
+    while(curr != NULL) {
         if(curr->symbol == symbol) {
             curr->freq += 1;
             return 1;
@@ -112,7 +112,7 @@ void sort(TreeNode t) {
 TreeNode createFreqTable(char* file) {
     FILE* fi;
     fi = fopen(file, "r");
-    TreeNode parent = newTreeNode(0);
+    TreeNode parent = NULL;
 
     char tempChar;
     while(fscanf(fi, "%c", &tempChar) != EOF) {
@@ -125,18 +125,6 @@ TreeNode createFreqTable(char* file) {
 
     // Ensure that list is in descending frequency
     sort(parent);
-
-    // Remove the sentinel node from the freqTable
-    TreeNode temp = parent;
-    while(temp->parent != NULL) {
-        if(temp->parent->symbol == 0) {
-            TreeNode removed = temp->parent;
-            temp->parent = removed->parent;
-            free(removed);
-        }
-
-        temp = temp->parent;
-    }
 
     // Free the frequency table's sentinel
     return parent;
@@ -250,11 +238,6 @@ void encode(char* file, TreeNode** leaves, int leavesCount) {
                     }
 
                     if(bufferLen == 8) {
-                        /* TODO */
-                        for(int i = 7; i >= 0; --i) {
-                            printf("%d", (buffer >> i) & 1);
-                        } /* */
-
                         fputc(buffer, fo);
                         buffer = 0;
                         bufferLen = 0;
@@ -270,10 +253,6 @@ void encode(char* file, TreeNode** leaves, int leavesCount) {
     if(bufferLen != 0) {
         buffer <<= 8 - bufferLen;
         fputc(buffer, fo);
-        /* TODO */
-        for(int i = 7; i >= 0; --i) {
-            printf("%d", (buffer >> i) & 1);
-        }; /* */
     }
 
     fclose(fi);
