@@ -20,7 +20,6 @@ Since character frequencies are not contained in the `target`, _the original unc
 The name of this file must remain consistent between encoding and decoding operations. 
 The decompressed text is written to a `.dec` file.
 
-
 == Implementation
 
 Both encoding and decoding begin with the construction of a Huffman tree, specific to the given file. 

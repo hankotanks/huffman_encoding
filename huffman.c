@@ -37,7 +37,8 @@ int main(int argc, char* argv[]) {
         // Construct the huffman tree
         root = createHuffmanTree(head);
         TreeNode* leafNodes = leaves(root, leafCount);
-
+        printf("%d", leafCount);
+        
         encode(argv[2], &leafNodes, leafCount);
     } else {
         // Before decoding, check that the name is long enough to be valid
@@ -274,10 +275,7 @@ void encode(char* file, TreeNode** leaves, int leavesCount) {
                 // Walk the length of the tree until reaching the root
                 int walkLen = 0;
                 while(curr->parent != NULL) {
-                    TreeNode temp = curr->parent->right;
-                    int symbolCheck = temp->symbol == curr->symbol;
-                    int freqCheck = temp->freq == curr->freq;
-                    if(symbolCheck && freqCheck) { walk++; }
+                    if(curr->parent->right == curr) { walk++; }
 
                     // Advance the walk and shift the buffer by 1
                     walkLen++;
@@ -337,17 +335,17 @@ void decode(char* file, TreeNode root) {
     char buffer;
     TreeNode curr = root;
     while(fscanf(fi, "%c", &buffer) != EOF) {
-        len = 7;
-        while(len >= 0) {
+        len = 8;
+        while(len > 0) {
             // Write symbol and advance to next bit
             if(curr->left == NULL && curr->right == NULL) {
                 fputc(curr->symbol, fo);
                 curr = root;
                 continue;
-            } 
-            
+            }
+
             // Advance down the tree in the appropriate direction
-            int val = (buffer >> len) & 1;
+            int val = (buffer >> len - 1) & 1;
             curr = val ? curr->right : curr->left;
 
             // Represents the number of bits remaining
