@@ -4,6 +4,8 @@
 #include "tree.h"
 #include "huffman.h"
 
+#define UL_SIZE sizeof(unsigned long)
+
 int main(int argc, char* argv[]) {
     // Make sure the right number of arguments are present
     if(argc < 3 || argc > 4) { 
@@ -35,6 +37,7 @@ int main(int argc, char* argv[]) {
         // This is a one-way linked list of character frequencies
         head = createFreqTable(argv[2]); 
 
+        // Save the freqTable to another file
         writeFreqTable(head);
 
         // Build an array of leaf nodes
@@ -43,8 +46,8 @@ int main(int argc, char* argv[]) {
         // Construct the huffman tree
         root = createHuffmanTree(head);
         TreeNode* leafNodes = leaves(root, leafCount);
-        displayTree(root);
         
+        // Encode using the tree's leaves
         encode(argv[2], &leafNodes, leafCount);
     } else {
         // Confirm that the file has the proper extension
@@ -56,9 +59,9 @@ int main(int argc, char* argv[]) {
             exit(1);
         }
 
+        // Build the tree from the freq table file
         TreeNode head = readFreqTable(argv[3]);
         TreeNode root = createHuffmanTree(head);
-        displayTree(root);
 
         // Decode the target file
         decode(argv[2], root);
@@ -233,6 +236,10 @@ TreeNode createHuffmanTree(TreeNode head) {
     return curr;
 }
 
+// Originally, my code just depended on the original file to decode,
+// but I decided it should be independent
+// This method writes the symbols and their frequencies to a file,
+// separated by a null character
 void writeFreqTable(TreeNode head) {
     FILE* fo;
     fo = fopen("freq", "wb");
@@ -249,6 +256,7 @@ void writeFreqTable(TreeNode head) {
     fclose(fo);
 }
 
+// Builds a frequency table from a file produced by the above method
 TreeNode readFreqTable(char* file) {
     FILE* fi;
     fi = fopen(file, "rb");
@@ -265,6 +273,8 @@ TreeNode readFreqTable(char* file) {
         unsigned int tempFreq = 0;
         fscanf(fi, "%u", &tempFreq);
 
+        // Construct the tree in reverse order to preserve ordering
+        // without the need to sort
         TreeNode temp = newTreeNode(tempChar);
         temp->freq = tempFreq;
         if(head == NULL) {
@@ -281,7 +291,6 @@ TreeNode readFreqTable(char* file) {
     fclose(fi);
 
     return head;
-
 }
 
 void encode(char* file, TreeNode** leaves, int leavesCount) {
@@ -321,9 +330,13 @@ void encode(char* file, TreeNode** leaves, int leavesCount) {
                     temp = temp->parent;
                 }
 
-                int walkSize = (depth % sizeof(unsigned long)) + 1;
+                // Originally, I used an unsigned long long as a buffer,
+                // but the compression started to break down in files
+                // with more than 64 different characters
+                // This array acts as a single, arbitrarily-long buffer
+                int walkSize = (depth % UL_SIZE) + 1;
                 unsigned long walk[walkSize];
-                memset(walk, 0, sizeof(unsigned long) * walkSize);
+                memset(walk, 0, UL_SIZE * walkSize);
 
                 // Walk the length of the tree until reaching the root
                 int walkLen = 0;
@@ -334,12 +347,16 @@ void encode(char* file, TreeNode** leaves, int leavesCount) {
                     walkLen++;
                     curr = curr->parent;
                     if(curr->parent != NULL) { 
-                        int MSB = walk[0] >> (sizeof(unsigned long) - 1);
+                        // This whole block of code is just a left shift
+                        // across the entire array
+                        int MSB = walk[0] >> (UL_SIZE - 1);
                         walk[0] <<= 1;
                         int i;
                         for(i = 1; i < walkSize; i++) {
                             int temp = MSB;
-                            MSB = walk[i] >> (sizeof(unsigned long) - 1);
+                            // Preverse the bit so it can be added to 
+                            // the following array element
+                            MSB = walk[i] >> (UL_SIZE - 1);
                             walk[i] <<= 1;
                             walk[i] |= temp;
                         }
@@ -351,13 +368,16 @@ void encode(char* file, TreeNode** leaves, int leavesCount) {
                     // Read value from buffer then shift
                     int val = (walk[0] & 1);
 
+                    // This block is just a right shift on the walk buffer
                     walk[0] >>= 1;
                     int i;
                     for(i = 1; i < walkSize; i++) {
-                        walk[i - 1] |= (walk[i] & 1) << (sizeof(unsigned long) - 1); 
+                        walk[i - 1] |= (walk[i] & 1) << (UL_SIZE - 1); 
                         walk[i] >>= 1;
                     }
 
+                    // Have to decr the walk buffer size,
+                    // since we took a bit from it
                     walkLen--;
 
                     // Add to write buffer
