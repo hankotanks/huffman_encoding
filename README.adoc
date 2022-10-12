@@ -33,4 +33,40 @@ The algorithm then walks up the tree until it reaches the root.
 Left children append a `0` to the bitstream, right children append a `1`. 
 Each character's code is reversed prior to writing, which avoids ambiguity in the decoding process.
 
-Compressed files are read 1 byte at a time. For each byte, the decoder starts at the root of the tree and traverses until it reaches a leaf. Left and right children are chosen based on the individual bits of the data.
+Compressed files are read 1 byte at a time. 
+For each byte, the decoder starts at the root of the tree and traverses until it reaches a leaf. 
+Left and right children are chosen based on the individual bits of the data.
+
+== Sample Files
+
+Each of the files presented below can be found in the `/test_files` subdirectory in their uncompressed form.
+
+[cols="1,1,1,1"]
+|===
+
+|File
+|`decind.txt`
+|`zork.txt`
+|`candy.txt`
+|`yoda.txt`
+
+|Description
+|The American Declaration of Independence
+|An ASCII map aid for the game Zork
+|A massive list of candy recipes
+|ASCII art of Yoda (in Cyrillic characters)
+
+|Size (bytes)
+|~83.5k
+|2670
+|~424k
+|2500
+
+|`.huf` Size (bytes)
+|~47k
+|1040
+|240k
+|882
+|===
+
+Files are sourced from http://textfiles.com[], although their names have been changed.
