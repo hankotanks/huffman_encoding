@@ -41,7 +41,7 @@ Left and right children are chosen based on the individual bits of the data.
 
 Each of the files presented below can be found in the `/test_files` subdirectory in their uncompressed form.
 
-[cols="1,1,1,1"]
+[cols="1,1,^1,^1"]
 |===
 |File |Description |Size of `.txt` (bytes) |Size of `.huf` (bytes)
 
