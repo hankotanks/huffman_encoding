@@ -43,10 +43,7 @@ Each of the files presented below can be found in the `/test_files` subdirectory
 
 [cols="1,1,1,1"]
 |===
-|File
-|Description
-|Size (bytes)
-|`.huf` Size (bytes)
+|File |Description |Size of `.txt` (bytes) |Size of `.huf` (bytes)
 
 |`decind.txt`
 |The American Declaration of Independence
