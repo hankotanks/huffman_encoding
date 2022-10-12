@@ -278,7 +278,6 @@ void encode(char* file, TreeNode** leaves, int leavesCount) {
                 }
 
                 int walkSize = (depth % sizeof(unsigned long)) + 1;
-                printf("%d\n", walkSize);
                 unsigned long walk[walkSize];
                 memset(walk, 0, sizeof(unsigned long) * walkSize);
 
@@ -368,7 +367,6 @@ void decode(char* file, TreeNode root) {
             if(curr->left == NULL && curr->right == NULL) {
                 fputc(curr->symbol, fo);
                 curr = root;
-                continue;
             }
 
             // Advance down the tree in the appropriate direction
