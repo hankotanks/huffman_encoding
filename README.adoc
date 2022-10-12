@@ -43,29 +43,29 @@ Each of the files presented below can be found in the `/test_files` subdirectory
 
 [cols="1,1,1,1"]
 |===
-
 |File
-|`decind.txt`
-|`zork.txt`
-|`candy.txt`
-|`yoda.txt`
-
 |Description
-|The American Declaration of Independence
-|An ASCII map aid for the game Zork
-|A massive list of candy recipes
-|ASCII art of Yoda (in Cyrillic characters)
-
 |Size (bytes)
-|~83.5k
-|2670
-|~424k
-|2500
-
 |`.huf` Size (bytes)
+
+|`decind.txt`
+|The American Declaration of Independence
+|~83.5k
 |~47k
+
+|`zork.txt`
+|An ASCII map aid for the game Zork
+|2670
 |1040
+
+|`candy.txt`
+|A massive list of candy recipes
+|~424k
 |240k
+
+|`yoda.txt`
+|ASCII art of Yoda (in Cyrillic characters)
+|2500
 |882
 |===
 
