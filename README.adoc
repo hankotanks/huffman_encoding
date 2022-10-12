@@ -7,17 +7,17 @@ It is only intended as a proof of concept.
 == Usage
 
 ----
-huffman [mode] [[args]]
+huffman [mode] [target] <freq>
 ----
 
 [horizontal]
-`-e` :: Expects 1 argument: the name of the file to encode. 
+`-e` :: Encodes the `target` file.
+Expects only 1 argument. 
 The compressed file is saved with the `.huf` extension. 
 The character frequency table is written to `freq`.
-`-d` :: Takes two arguments, the `target` file and a `freq` table.
+`-d` :: Takes 2 arguments, the `target` file and a `freq` table.
 Decodes the `target` file using the supplied `freq` table.
-This operation expects a `.huf` file and will fail if the `target` is of a different type. 
-The operation will fail if a different `freq` file is used for encoding and decoding.
+This operation expects the `target` to be a `.huf` file and will fail if it is a different type. 
 The decompressed text is written to a `.dec` file.
 
 == Sample Files
