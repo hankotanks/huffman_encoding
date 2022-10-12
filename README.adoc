@@ -7,41 +7,25 @@ It is only intended as a proof of concept.
 == Usage
 
 ----
-huffman [mode] [target]
+huffman [mode] [[args]]
 ----
 
 [horizontal]
-`-e` :: Encodes the `target`. 
+`-e` :: Expects 1 argument: the name of the file to encode. 
 The compressed file is saved with the `.huf` extension. 
-Character frequencies are not appended to the compressed file.
-`-d` :: Decodes the `target`. 
+The character frequency table is written to `freq`.
+`-d` :: Takes two arguments, the `target` file and a `freq` table.
+Decodes the `target` file using the supplied `freq` table.
 This operation expects a `.huf` file and will fail if the `target` is of a different type. 
-Since character frequencies are not contained in the `target`, _the original uncompressed file must be present in the PWD._
-The name of this file must remain consistent between encoding and decoding operations. 
+The operation will fail if a different `freq` file is used for encoding and decoding.
 The decompressed text is written to a `.dec` file.
-
-== Implementation
-
-Both encoding and decoding begin with the construction of a Huffman tree, specific to the given file. 
-First, character frequencies are compiled as an SLL of `TreeNode` objects. 
-This list is then sorted and assembled into a tree by repeatedly placing the first two nodes under a new parent node until only one root node remains.
-
-To begin encoding, an array of pointers to the tree's leaf nodes are constructed. 
-The target file is then read character by character. 
-Each character is matched against the array of leaves until the corresponding node is found. 
-The algorithm then walks up the tree until it reaches the root. 
-Left children append a `0` to the bitstream, right children append a `1`. 
-Each character's code is reversed prior to writing, which avoids ambiguity in the decoding process.
-
-Compressed files are read 1 byte at a time. 
-For each byte, the decoder starts at the root of the tree and traverses until it reaches a leaf. 
-Left and right children are chosen based on the individual bits of the data.
 
 == Sample Files
 
 Each of the files presented below can be found in the `/test_files` subdirectory in their uncompressed form.
+Files are sourced from http://textfiles.com[], although their names have been changed.
 
-[cols="1,1,^1,^1"]
+[cols="1,1,^1,^1", options=header]
 |===
 |File |Description |Size of `.txt` (bytes) |Size of `.huf` (bytes)
 
@@ -66,4 +50,19 @@ Each of the files presented below can be found in the `/test_files` subdirectory
 |882
 |===
 
-Files are sourced from http://textfiles.com[], although their names have been changed.
+== Implementation
+
+Both encoding and decoding begin with the construction of a Huffman tree, specific to the given file. 
+First, character frequencies are compiled as an SLL of `TreeNode` objects. 
+This list is then sorted and assembled into a tree by repeatedly placing the first two nodes under a new parent node until only one root node remains.
+
+To begin encoding, an array of pointers to the tree's leaf nodes are constructed. 
+The target file is then read character by character. 
+Each character is matched against the array of leaves until the corresponding node is found. 
+The algorithm then walks up the tree until it reaches the root. 
+Left children append a `0` to the bitstream, right children append a `1`. 
+Each character's code is reversed prior to writing, which avoids ambiguity in the decoding process.
+
+Compressed files are read 1 byte at a time. 
+For each byte, the decoder starts at the root of the tree and traverses until it reaches a leaf. 
+Left and right children are chosen based on the individual bits of the data.

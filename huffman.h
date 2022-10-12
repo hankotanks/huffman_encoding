@@ -5,6 +5,8 @@
 
 // Helper methods
 TreeNode createFreqTable(char* file);
+void writeFreqTable(TreeNode head);
+TreeNode readFreqTable(char* file);
 TreeNode createHuffmanTree(TreeNode head);
 int leavesCount(TreeNode head);
 TreeNode* leaves(TreeNode root, int leavesCount);

@@ -1,6 +1,6 @@
 // Declare the struct here so huffman.c has access to its fields
 struct node {
-    int freq;
+    unsigned int freq;
     char symbol;
     struct node* left;
     struct node* right;

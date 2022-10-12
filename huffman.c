@@ -6,7 +6,7 @@
 
 int main(int argc, char* argv[]) {
     // Make sure the right number of arguments are present
-    if(argc != 3) { 
+    if(argc < 3 || argc > 4) { 
         printf("Error: Incorrect argument format\n"); 
         exit(1);
     }
@@ -17,6 +17,10 @@ int main(int argc, char* argv[]) {
         mode = 1;
     } else if(strcmp(argv[1], "-d") == 0) { 
         mode = 0;
+        if(argc != 4) {
+            printf("Error: Incorrect argument format\n");
+            exit(1);
+        }
     } else { // Exit if the command flag isn't `-e` or `-d`
         printf("Error: Invalid command flag\n");
         exit(1);
@@ -31,24 +35,26 @@ int main(int argc, char* argv[]) {
         // This is a one-way linked list of character frequencies
         head = createFreqTable(argv[2]); 
 
+        writeFreqTable(head);
+
+        TreeNode t = head;
+        while(t->parent != NULL) {
+            printf("%c : %d\n", t->symbol, t->freq);
+            t = t->parent;
+        }
+
         // Build an array of leaf nodes
         int leafCount = leavesCount(head);
         
         // Construct the huffman tree
         root = createHuffmanTree(head);
         TreeNode* leafNodes = leaves(root, leafCount);
-        printf("%d", leafCount);
         
         encode(argv[2], &leafNodes, leafCount);
     } else {
-        // Before decoding, check that the name is long enough to be valid
-        int len = strlen(argv[2]);
-        if(len < 5) {
-            printf("Error: File must have both name and extension\n");
-            exit(1);
-        }
-
         // Confirm that the file has the proper extension
+        
+        int len = strlen(argv[2]);
         const char* ext = &(argv[2])[len - 4];
         const char* huf = ".huf";
         if(strcmp(ext, huf) != 0) {
@@ -56,17 +62,9 @@ int main(int argc, char* argv[]) {
             exit(1);
         }
 
-        // Get the original file name (without the .huf extension)
-        char temp[len - 4];
-        int i;
-        for(i = 0; i < len - 4; i++) { temp[i] = argv[2][i]; }
-        temp[len - 4] = '\0';
+        TreeNode head = readFreqTable(argv[3]);
+        TreeNode root = createHuffmanTree(head);
 
-        // Recreate the frequency table -- then build the tree
-        head = createFreqTable(temp);
-        root = createHuffmanTree(head);
-
-        
         // Decode the target file
         decode(argv[2], root);
    }
@@ -114,8 +112,8 @@ void sort(TreeNode head) {
         while(curr != NULL) {
             if(curr->freq < prev->freq) {
                 // Copy TreeNode content
-                int tempFreq = prev->freq;
-                int tempChar = prev->symbol;
+                char tempChar = prev->symbol;
+                unsigned int tempFreq = prev->freq;
                 TreeNode tempLeft = prev->left;
                 TreeNode tempRight = prev->right;
                 
@@ -238,6 +236,57 @@ TreeNode createHuffmanTree(TreeNode head) {
 
     // Returns the root of the newly-created Huffman tree
     return curr;
+}
+
+void writeFreqTable(TreeNode head) {
+    FILE* fo;
+    fo = fopen("freq", "w");
+
+    TreeNode curr = head;
+    while(curr != NULL) {
+        fputc(curr->symbol, fo);
+        fprintf(fo, "%u\n", curr->freq);
+
+        curr = curr->parent;
+    }
+
+    fclose(fo);
+}
+
+TreeNode readFreqTable(char* file) {
+    FILE* fi;
+    fi = fopen(file, "rb");
+    if(fi == NULL) {
+        printf("Error: Couldn't open the given freq table\n");
+        exit(1);
+    }
+
+    TreeNode head = NULL;
+
+    char tempChar;
+    while(fscanf(fi, "%c", &tempChar) != EOF) {
+        unsigned int tempFreq = 0;
+        fscanf(fi, "%u\n", &tempFreq);
+
+        TreeNode temp = newTreeNode(tempChar);
+        temp->freq = tempFreq;
+        temp->parent = head;
+        
+        head = temp;
+    }
+
+    fclose(fi);
+
+    sort(head);
+
+    TreeNode t = head;
+    while(t != NULL) {
+        printf("%c : %d\n", t->symbol, t->freq);
+        t = t->parent;
+    }
+
+    return head;
+
 }
 
 void encode(char* file, TreeNode** leaves, int leavesCount) {
