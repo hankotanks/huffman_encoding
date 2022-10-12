@@ -270,24 +270,51 @@ void encode(char* file, TreeNode** leaves, int leavesCount) {
         for(i = 0; i < leavesCount; i++) {
             TreeNode curr = (*leaves)[i];
             if(curr->symbol == temp) {
-                unsigned long walk = 0;
+                TreeNode temp = curr;
+                int depth = 0;
+                while(temp->parent != NULL) {
+                    depth++;
+                    temp = temp->parent;
+                }
+
+                int walkSize = (depth % sizeof(unsigned long)) + 1;
+                printf("%d\n", walkSize);
+                unsigned long walk[walkSize];
+                memset(walk, 0, sizeof(unsigned long) * walkSize);
 
                 // Walk the length of the tree until reaching the root
                 int walkLen = 0;
                 while(curr->parent != NULL) {
-                    if(curr->parent->right == curr) { walk++; }
+                    if(curr->parent->right == curr) { walk[0]++; }
 
                     // Advance the walk and shift the buffer by 1
                     walkLen++;
                     curr = curr->parent;
-                    if(curr->parent != NULL) { walk <<= 1; }
+                    if(curr->parent != NULL) { 
+                        int MSB = walk[0] >> (sizeof(unsigned long) - 1);
+                        walk[0] <<= 1;
+                        int i;
+                        for(i = 1; i < walkSize; i++) {
+                            int temp = MSB;
+                            MSB = walk[i] >> (sizeof(unsigned long) - 1);
+                            walk[i] <<= 1;
+                            walk[i] |= temp;
+                        }
+                    }
                 }
 
                 // Write data from the walk buffer to the write buffer
                 while(walkLen > 0) {
                     // Read value from buffer then shift
-                    int val = (walk & 1);
-                    walk >>= 1;
+                    int val = (walk[0] & 1);
+
+                    walk[0] >>= 1;
+                    int i;
+                    for(i = 1; i < walkSize; i++) {
+                        walk[i - 1] |= (walk[i] & 1) << (sizeof(unsigned long) - 1); 
+                        walk[i] >>= 1;
+                    }
+
                     walkLen--;
 
                     // Add to write buffer
@@ -345,7 +372,7 @@ void decode(char* file, TreeNode root) {
             }
 
             // Advance down the tree in the appropriate direction
-            int val = (buffer >> len - 1) & 1;
+            int val = (buffer >> (len - 1)) & 1;
             curr = val ? curr->right : curr->left;
 
             // Represents the number of bits remaining
