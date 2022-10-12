@@ -37,23 +37,17 @@ int main(int argc, char* argv[]) {
 
         writeFreqTable(head);
 
-        TreeNode t = head;
-        while(t->parent != NULL) {
-            printf("%c : %d\n", t->symbol, t->freq);
-            t = t->parent;
-        }
-
         // Build an array of leaf nodes
         int leafCount = leavesCount(head);
         
         // Construct the huffman tree
         root = createHuffmanTree(head);
         TreeNode* leafNodes = leaves(root, leafCount);
+        displayTree(root);
         
         encode(argv[2], &leafNodes, leafCount);
     } else {
         // Confirm that the file has the proper extension
-        
         int len = strlen(argv[2]);
         const char* ext = &(argv[2])[len - 4];
         const char* huf = ".huf";
@@ -64,6 +58,7 @@ int main(int argc, char* argv[]) {
 
         TreeNode head = readFreqTable(argv[3]);
         TreeNode root = createHuffmanTree(head);
+        displayTree(root);
 
         // Decode the target file
         decode(argv[2], root);
@@ -240,12 +235,13 @@ TreeNode createHuffmanTree(TreeNode head) {
 
 void writeFreqTable(TreeNode head) {
     FILE* fo;
-    fo = fopen("freq", "w");
+    fo = fopen("freq", "wb");
 
     TreeNode curr = head;
     while(curr != NULL) {
         fputc(curr->symbol, fo);
-        fprintf(fo, "%u\n", curr->freq);
+        fprintf(fo, "%u", curr->freq);
+        fprintf(fo, "%c", (char) 0);
 
         curr = curr->parent;
     }
@@ -262,28 +258,27 @@ TreeNode readFreqTable(char* file) {
     }
 
     TreeNode head = NULL;
+    TreeNode tail = NULL;
 
     char tempChar;
     while(fscanf(fi, "%c", &tempChar) != EOF) {
         unsigned int tempFreq = 0;
-        fscanf(fi, "%u\n", &tempFreq);
+        fscanf(fi, "%u", &tempFreq);
 
         TreeNode temp = newTreeNode(tempChar);
         temp->freq = tempFreq;
-        temp->parent = head;
-        
-        head = temp;
+        if(head == NULL) {
+            head = temp;
+            tail = temp;
+        } else {
+            tail->parent = temp;
+            tail = temp;
+        }
+
+        fscanf(fi, "%c", &tempFreq);
     }
 
     fclose(fi);
-
-    sort(head);
-
-    TreeNode t = head;
-    while(t != NULL) {
-        printf("%c : %d\n", t->symbol, t->freq);
-        t = t->parent;
-    }
 
     return head;
 
