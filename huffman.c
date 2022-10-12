@@ -344,7 +344,7 @@ void encode(char* file, TreeNode** leaves, int leavesCount) {
 void decode(char* file, TreeNode root) {
     // Input file
     FILE* fi;
-    fi = fopen(file, "r");
+    fi = fopen(file, "rb");
 
     // Build the output filename
     int len = strlen(file);
@@ -360,7 +360,9 @@ void decode(char* file, TreeNode root) {
     
     char buffer;
     TreeNode curr = root;
-    while(fscanf(fi, "%c", &buffer) != EOF) {
+    while(!feof(fi)) { // CANNOT CHECK FSCANF STATUS AS BREAK CONDITION, encoded file can contain EOF prematurely
+        fscanf(fi, "%c", &buffer);
+
         len = 8;
         while(len > 0) {
             // Write symbol and advance to next bit
