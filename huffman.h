@@ -3,10 +3,12 @@
  *   `root` refers to the top of the generated Huffman tree
  */
 
-// Helper methods
+// Constuction, reading, and writing of frequency table 
 TreeNode createFreqTable(char* file);
-void writeFreqTable(TreeNode head);
 TreeNode readFreqTable(char* file);
+void writeFreqTable(TreeNode head);
+
+// Methods relating to the huffman tree
 TreeNode createHuffmanTree(TreeNode head);
 int leavesCount(TreeNode head);
 TreeNode* leaves(TreeNode root, int leavesCount);
