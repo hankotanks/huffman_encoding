@@ -32,6 +32,16 @@ int main(int argc, char* argv[]) {
     // `root` points to the root of the huffman tree
     TreeNode head;
     TreeNode root;
+
+    // Make sure the target file exists
+    FILE* temp;
+    temp = fopen(argv[2], "rb");
+    if(temp == NULL) { // If file doesn't exist
+        printf("Error: Couldn't open file\n");
+        exit(1);
+    } else {
+        fclose(temp);
+    }
     
     if(mode) {
         // This is a one-way linked list of character frequencies
@@ -299,10 +309,6 @@ void encode(char* file, TreeNode** leaves, int leavesCount) {
     // Open the input file
     FILE* fi;
     fi = fopen(file, "rb");
-    if(fi == NULL) { // If file doesn't exist
-        printf("Error: Couldn't open file\n");
-        exit(1);
-    }
 
     // Construct the output file's name
     int len = strlen(file);
