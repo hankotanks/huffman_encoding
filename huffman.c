@@ -160,6 +160,65 @@ TreeNode createFreqTable(char* file) {
     return parent;
 }
 
+// Originally, my code just depended on the original file to decode,
+// but I decided it should be independent
+// This method writes the symbols and their frequencies to a file,
+// separated by a null character
+void writeFreqTable(TreeNode head) {
+    FILE* fo;
+    fo = fopen("freq", "wb");
+
+    TreeNode curr = head;
+    while(curr != NULL) {
+        fputc(curr->symbol, fo);
+        fprintf(fo, "%u", curr->freq);
+        fprintf(fo, "%c", (char) 0);
+
+        curr = curr->parent;
+    }
+
+    fclose(fo);
+}
+
+// Builds a frequency table from a file produced by the above method
+TreeNode readFreqTable(char* file) {
+    FILE* fi;
+    fi = fopen(file, "rb");
+    if(fi == NULL) {
+        printf("Error: Couldn't open the given freq table\n");
+        exit(1);
+    }
+
+    // We need to keep track of the tail of the SLL
+    // So we can add new TreeNodes w/o traversing the entire list
+    TreeNode head = NULL;
+    TreeNode tail = NULL;
+
+    char tempChar;
+    while(fscanf(fi, "%c", &tempChar) != EOF) {
+        unsigned int tempFreq = 0;
+        fscanf(fi, "%u", &tempFreq);
+
+        // Construct the tree in reverse order to preserve ordering
+        // without the need to sort
+        TreeNode temp = newTreeNode(tempChar);
+        temp->freq = tempFreq;
+        if(head == NULL) {
+            head = temp;
+            tail = temp;
+        } else {
+            tail->parent = temp;
+            tail = temp;
+        }
+
+        fscanf(fi, "%c", &tempFreq);
+    }
+
+    fclose(fi);
+
+    return head;
+}
+
 int leavesCount(TreeNode head) {
     TreeNode curr = head;
 
@@ -236,67 +295,10 @@ TreeNode createHuffmanTree(TreeNode head) {
     return curr;
 }
 
-// Originally, my code just depended on the original file to decode,
-// but I decided it should be independent
-// This method writes the symbols and their frequencies to a file,
-// separated by a null character
-void writeFreqTable(TreeNode head) {
-    FILE* fo;
-    fo = fopen("freq", "wb");
-
-    TreeNode curr = head;
-    while(curr != NULL) {
-        fputc(curr->symbol, fo);
-        fprintf(fo, "%u", curr->freq);
-        fprintf(fo, "%c", (char) 0);
-
-        curr = curr->parent;
-    }
-
-    fclose(fo);
-}
-
-// Builds a frequency table from a file produced by the above method
-TreeNode readFreqTable(char* file) {
-    FILE* fi;
-    fi = fopen(file, "rb");
-    if(fi == NULL) {
-        printf("Error: Couldn't open the given freq table\n");
-        exit(1);
-    }
-
-    TreeNode head = NULL;
-    TreeNode tail = NULL;
-
-    char tempChar;
-    while(fscanf(fi, "%c", &tempChar) != EOF) {
-        unsigned int tempFreq = 0;
-        fscanf(fi, "%u", &tempFreq);
-
-        // Construct the tree in reverse order to preserve ordering
-        // without the need to sort
-        TreeNode temp = newTreeNode(tempChar);
-        temp->freq = tempFreq;
-        if(head == NULL) {
-            head = temp;
-            tail = temp;
-        } else {
-            tail->parent = temp;
-            tail = temp;
-        }
-
-        fscanf(fi, "%c", &tempFreq);
-    }
-
-    fclose(fi);
-
-    return head;
-}
-
 void encode(char* file, TreeNode** leaves, int leavesCount) {
     // Open the input file
     FILE* fi;
-    fi = fopen(file, "r");
+    fi = fopen(file, "rb");
     if(fi == NULL) { // If file doesn't exist
         printf("Error: Couldn't open file\n");
         exit(1);
@@ -313,7 +315,7 @@ void encode(char* file, TreeNode** leaves, int leavesCount) {
 
     // Open output file
     FILE* fo;
-    fo = fopen(output, "w");
+    fo = fopen(output, "wb");
 
     len = 8;
     char buffer = 0;
@@ -419,11 +421,14 @@ void decode(char* file, TreeNode root) {
 
     // Open the output file
     FILE* fo;
-    fo = fopen(temp, "w");
+    fo = fopen(temp, "wb");
     
     char buffer;
     TreeNode curr = root;
-    while(!feof(fi)) { // CANNOT CHECK FSCANF STATUS AS BREAK CONDITION, encoded file can contain EOF prematurely
+    while(!feof(fi)) {
+        // Can't check for EOF in loop condition.
+        // Some trees result in a bit sequence that corresponds to 0x1A,
+        // which is the DOS EOF code, which makes it fail on Windows
         fscanf(fi, "%c", &buffer);
 
         len = 8;
