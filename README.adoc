@@ -31,7 +31,7 @@ Files are sourced from http://textfiles.com[], although their names have been ch
 
 |`decind.txt`
 |The American Declaration of Independence
-|~83.5k
+|~83k
 |~47k
 
 |`zork.txt`
@@ -42,7 +42,7 @@ Files are sourced from http://textfiles.com[], although their names have been ch
 |`candy.txt`
 |A massive list of candy recipes
 |~424k
-|240k
+|~240k
 
 |`yoda.txt`
 |ASCII art of Yoda (in Cyrillic characters)
