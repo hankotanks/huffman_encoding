@@ -4,7 +4,7 @@
 #include "tree.h"
 #include "huffman.h"
 
-#define UL_SIZE sizeof(unsigned long)
+#define UL_SIZE sizeof(unsigned long) * 8
 
 int main(int argc, char* argv[]) {
     // Make sure the right number of arguments are present
@@ -336,7 +336,7 @@ void encode(char* file, TreeNode** leaves, int leavesCount) {
                 // This array acts as a single, arbitrarily-long buffer
                 int walkSize = (depth % UL_SIZE) + 1;
                 unsigned long walk[walkSize];
-                memset(walk, 0, UL_SIZE * walkSize);
+                memset(walk, 0, sizeof(unsigned long) * walkSize);
 
                 // Walk the length of the tree until reaching the root
                 int walkLen = 0;
@@ -349,14 +349,13 @@ void encode(char* file, TreeNode** leaves, int leavesCount) {
                     if(curr->parent != NULL) { 
                         // This whole block of code is just a left shift
                         // across the entire array
-                        int MSB = walk[0] >> (UL_SIZE - 1);
-                        walk[0] <<= 1;
+                        int MSB = 0;
                         int i;
-                        for(i = 1; i < walkSize; i++) {
+                        for(i = 0; i < walkSize; i++) {
                             int temp = MSB;
-                            // Preverse the bit so it can be added to 
+                            // Preserve the bit so it can be added to 
                             // the following array element
-                            MSB = walk[i] >> (UL_SIZE - 1);
+                            MSB = (walk[i] >> (UL_SIZE - 1)) & 1;
                             walk[i] <<= 1;
                             walk[i] |= temp;
                         }
@@ -366,23 +365,23 @@ void encode(char* file, TreeNode** leaves, int leavesCount) {
                 // Write data from the walk buffer to the write buffer
                 while(walkLen > 0) {
                     // Read value from buffer then shift
-                    int val = (walk[0] & 1);
-
-                    // This block is just a right shift on the walk buffer
-                    walk[0] >>= 1;
+                    int LSB = 0;
                     int i;
-                    for(i = 1; i < walkSize; i++) {
-                        walk[i - 1] |= (walk[i] & 1) << (UL_SIZE - 1); 
+                    for(i = walkSize - 1; i >= 0; i--) {
+                        int temp = LSB;
+                        LSB = walk[i] & 1;
                         walk[i] >>= 1;
+                        walk[i] |= temp;
+                        
                     }
 
-                    // Have to decr the walk buffer size,
+                    // Have to decrement the walk buffer size,
                     // since we took a bit from it
                     walkLen--;
 
                     // Add to write buffer
                     len--;
-                    buffer |= (val << len);
+                    buffer |= (LSB << len);
 
                     // If buffer is full, write to file then clear it
                     if(len == 0) {
