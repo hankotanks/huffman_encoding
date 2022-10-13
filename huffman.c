@@ -8,19 +8,23 @@
 
 int main(int argc, char* argv[]) {
     // Make sure the right number of arguments are present
-    if(argc < 3 || argc > 4) { 
-        printf("Error: Incorrect argument format\n"); 
+    if(argc < 2) { 
+        printf("Error: Invalid argument format\n"); 
         exit(1);
     }
     
     // Check if the user wants to encode or decode
     int mode;
     if(strcmp(argv[1], "-e") == 0) {
+        if(argc != 3) {
+            printf("Error: Encoder expects 1 argument\n");
+            exit(1);
+        }
         mode = 1;
     } else if(strcmp(argv[1], "-d") == 0) { 
         mode = 0;
         if(argc != 4) {
-            printf("Error: Incorrect argument format\n");
+            printf("Error: Decoder expects 2 arguments\n");
             exit(1);
         }
     } else { // Exit if the command flag isn't `-e` or `-d`

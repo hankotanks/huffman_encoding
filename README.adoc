@@ -65,3 +65,11 @@ Each character's code is reversed prior to writing, which avoids ambiguity in th
 Compressed files are read 1 byte at a time. 
 For each byte, the decoder starts at the root of the tree and traverses until it reaches a leaf. 
 Left and right children are chosen based on the individual bits of the data.
+
+== (Handled) Error States
+
+.The program will fail and exit if...
+* an invalid command flag is given
+* wrong number of arguments are supplied for the intended operation
+* any file argument cannot be opened
+* the decoder recieves files without appropriate extensions
