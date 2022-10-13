@@ -6,7 +6,7 @@
 // Constuction, reading, and writing of frequency table 
 TreeNode createFreqTable(char* file);
 TreeNode readFreqTable(char* file);
-void writeFreqTable(TreeNode head);
+void writeFreqTable(char* file, TreeNode head);
 
 // Methods relating to the huffman tree
 TreeNode createHuffmanTree(TreeNode head);

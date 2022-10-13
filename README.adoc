@@ -12,13 +12,12 @@ huffman [mode] [target] <freq>
 
 [horizontal]
 `-e` :: Encodes the `target` file.
-Expects only 1 argument. 
-The compressed file is saved with the `.huf` extension. 
-The character frequency table is written to `freq`.
-`-d` :: Takes 2 arguments, the `target` file and a `freq` table.
-Decodes the `target` file using the supplied `freq` table.
-This operation expects the `target` to be a `.huf` file and will fail if it is a different type. 
-The decompressed text is written to a `.dec` file.
+Expects only one argument. 
+The encoder creates two files.
+The first contains the compressed data (a `.huf` file) and the frequency table is written to the other.
+`-d` :: Decodes the `target` file using the given `freq` table.
+This operation expects both the `target` file and its corresponding frequency table to have appropriate extensions (`.huf` and `.freq`, respectively).
+The decompressed data is written to a `.dec` file, which is human-readable.
 
 == Sample Files
 

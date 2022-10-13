@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
         head = createFreqTable(argv[2]); 
 
         // Save the freqTable to another file
-        writeFreqTable(head);
+        writeFreqTable(argv[2], head);
 
         // Build an array of leaf nodes
         int leafCount = leavesCount(head);
@@ -62,10 +62,12 @@ int main(int argc, char* argv[]) {
     } else {
         // Confirm that the file has the proper extension
         int len = strlen(argv[2]);
-        const char* ext = &(argv[2])[len - 4];
+        const char* target_ext = &(argv[2])[len - 4];
         const char* huf = ".huf";
-        if(strcmp(ext, huf) != 0) {
-            printf("Error: Invalid file extension (should be *.huf)");
+        const char* freq_ext = &(argv[2])[len - 5];
+        const char* freq = ".freq";
+        if(strcmp(target_ext, huf) != 0 || strcmp(freq_ext, freq) != 0) {
+            printf("Error: Invalid file extension(s)");
             exit(1);
         }
 
@@ -174,9 +176,19 @@ TreeNode createFreqTable(char* file) {
 // but I decided it should be independent
 // This method writes the symbols and their frequencies to a file,
 // separated by a null character
-void writeFreqTable(TreeNode head) {
+void writeFreqTable(char* file, TreeNode head) {
+    // Build the output file name from the original file
+    int len = strlen(file);
+    char output[len + 5];
+    strcpy(output, file);
+    output[len + 0] = '.';
+    output[len + 1] = 'f';
+    output[len + 2] = 'r';
+    output[len + 3] = 'e';
+    output[len + 4] = 'q';
+
     FILE* fo;
-    fo = fopen("freq", "wb");
+    fo = fopen(output, "wb");
 
     TreeNode curr = head;
     while(curr != NULL) {
