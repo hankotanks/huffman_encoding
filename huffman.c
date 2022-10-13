@@ -12,6 +12,8 @@ int main(int argc, char* argv[]) {
         printf("Error: Invalid argument format\n"); 
         exit(1);
     }
+
+    FILE* temp;
     
     // Check if the user wants to encode or decode
     int mode;
@@ -20,6 +22,16 @@ int main(int argc, char* argv[]) {
             printf("Error: Encoder expects 1 argument\n");
             exit(1);
         }
+
+        // Make sure the target file exists
+        temp = fopen(argv[2], "rb");
+        if(temp == NULL) { // If file doesn't exist
+            printf("Error: Couldn't open file\n");
+            exit(1);
+        } else {
+            fclose(temp);
+        }
+
         mode = 1;
     } else if(strcmp(argv[1], "-d") == 0) { 
         mode = 0;
@@ -27,6 +39,44 @@ int main(int argc, char* argv[]) {
             printf("Error: Decoder expects 2 arguments\n");
             exit(1);
         }
+
+        // Make sure the target file exists
+        temp = fopen(argv[2], "rb");
+        if(temp == NULL) { // If file doesn't exist
+            printf("Error: Couldn't open file\n");
+            exit(1);
+        } else {
+            fclose(temp);
+        }
+
+        temp = fopen(argv[3], "rb");
+        if(temp == NULL) {
+            printf("Error: Couldn't open file\n");
+            exit(1);
+        } else {
+            fclose(temp);
+        }
+
+        int failed = 0;
+
+        // Confirm that the file has the proper extension
+        int len = strlen(argv[2]);
+        const char* target_ext = &(argv[2])[len - 4];
+        const char* huf = ".huf";
+        if(strcmp(target_ext, huf) != 0) {
+            printf("Error: Invalid file extension (should be .huf)\n");
+            failed = 1;
+        }
+
+        len = strlen(argv[3]);
+        const char* freq_ext = &(argv[3])[len - 5];
+        const char* freq = ".freq";
+        if(strcmp(freq_ext, freq) != 0) {
+            printf("Error: Invalid file extension (should be .freq)\n");
+            failed = 1;
+        }
+
+        if(failed) { exit(1); }
     } else { // Exit if the command flag isn't `-e` or `-d`
         printf("Error: Invalid command flag\n");
         exit(1);
@@ -36,16 +86,6 @@ int main(int argc, char* argv[]) {
     // `root` points to the root of the huffman tree
     TreeNode head;
     TreeNode root;
-
-    // Make sure the target file exists
-    FILE* temp;
-    temp = fopen(argv[2], "rb");
-    if(temp == NULL) { // If file doesn't exist
-        printf("Error: Couldn't open file\n");
-        exit(1);
-    } else {
-        fclose(temp);
-    }
     
     if(mode) {
         // This is a one-way linked list of character frequencies
@@ -64,17 +104,6 @@ int main(int argc, char* argv[]) {
         // Encode using the tree's leaves
         encode(argv[2], &leafNodes, leafCount);
     } else {
-        // Confirm that the file has the proper extension
-        int len = strlen(argv[2]);
-        const char* target_ext = &(argv[2])[len - 4];
-        const char* huf = ".huf";
-        const char* freq_ext = &(argv[2])[len - 5];
-        const char* freq = ".freq";
-        if(strcmp(target_ext, huf) != 0 || strcmp(freq_ext, freq) != 0) {
-            printf("Error: Invalid file extension(s)");
-            exit(1);
-        }
-
         // Build the tree from the freq table file
         TreeNode head = readFreqTable(argv[3]);
         TreeNode root = createHuffmanTree(head);
@@ -190,6 +219,7 @@ void writeFreqTable(char* file, TreeNode head) {
     output[len + 2] = 'r';
     output[len + 3] = 'e';
     output[len + 4] = 'q';
+    output[len + 5] = '\0';
 
     FILE* fo;
     fo = fopen(output, "wb");
@@ -210,10 +240,6 @@ void writeFreqTable(char* file, TreeNode head) {
 TreeNode readFreqTable(char* file) {
     FILE* fi;
     fi = fopen(file, "rb");
-    if(fi == NULL) {
-        printf("Error: Couldn't open the given freq table\n");
-        exit(1);
-    }
 
     // We need to keep track of the tail of the SLL
     // So we can add new TreeNodes w/o traversing the entire list
